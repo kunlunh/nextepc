@@ -247,12 +247,12 @@ static status_t decode_ipv6_header(
 
     return CORE_OK;
 }
-    
-pgw_bearer_t *pgw_bearer_find_by_packet(pkbuf_t *pkt) {
+
+pgw_bearer_t *pgw_bearer_find_by_packet(pkbuf_t *pkt)
+{
     hash_index_t *hi = NULL;
-    struct ip *ip_h = NULL;
-    struct ip6_hdr *ip6_h = NULL;
-    c_uint32_t src_addr_value, dst_addr_value; // Temporary variables for addresses
+    struct ip *ip_h =  NULL;
+    struct ip6_hdr *ip6_h =  NULL;
     c_uint32_t *src_addr = NULL;
     c_uint32_t *dst_addr = NULL;
     int addr_len = 0;
@@ -261,38 +261,35 @@ pgw_bearer_t *pgw_bearer_find_by_packet(pkbuf_t *pkt) {
     char buf[CORE_ADDRSTRLEN];
 
     d_assert(pkt, return NULL, "pkt is NULL");
-    d_assert(pkt->payload, return NULL, "payload is NULL");
+    d_assert(pkt->payload, return NULL, "pkt is NULL");
 
     ip_h = (struct ip *)pkt->payload;
-    if (ip_h->ip_v == 4) {
+    if (ip_h->ip_v == 4)
+    {
         ip_h = (struct ip *)pkt->payload;
         ip6_h = NULL;
+
         proto = ip_h->ip_p;
-        ip_hlen = (ip_h->ip_hl) * 4;
+        ip_hlen = (ip_h->ip_hl)*4;
 
-        // Copy IPv4 addresses into aligned variables
-        memcpy(&src_addr_value, &ip_h->ip_src.s_addr, sizeof(src_addr_value));
-        memcpy(&dst_addr_value, &ip_h->ip_dst.s_addr, sizeof(dst_addr_value));
-
-        // Use the aligned variables
-        src_addr = &src_addr_value;
-        dst_addr = &dst_addr_value;
+        src_addr = &ip_h->ip_src.s_addr;
+        dst_addr = &ip_h->ip_dst.s_addr;
         addr_len = 4;
-    } else if (ip_h->ip_v == 6) {
+    }
+    else if (ip_h->ip_v == 6)
+    {
         ip_h = NULL;
         ip6_h = (struct ip6_hdr *)pkt->payload;
+
         decode_ipv6_header(ip6_h, &proto, &ip_hlen);
-	c_uint32_t src_addr_values[4], dst_addr_values[4];
-    
-        memcpy(src_addr_values, ip6_h->ip6_src.s6_addr, sizeof(src_addr_values));
-        memcpy(dst_addr_values, ip6_h->ip6_dst.s6_addr, sizeof(dst_addr_values));
-	src_addr = src_addr_values;
-        dst_addr = dst_addr_values;
+
+        src_addr = (c_uint32_t *)ip6_h->ip6_src.s6_addr;
+        dst_addr = (c_uint32_t *)ip6_h->ip6_dst.s6_addr;
         addr_len = 16;
-    } else {
-        d_error("Invalid IP version = %d\n", ip_h->ip_v);
-        return NULL;
+
     }
+    else
+        d_error("Invalid IP version = %d\n", ip_h->ip_v);
 
     d_trace(5, "[PGW] PROTO:%d SRC:%08x %08x %08x %08x\n",
             proto, ntohl(src_addr[0]), ntohl(src_addr[1]),
