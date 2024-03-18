@@ -4,25 +4,57 @@ NextEPC is an Open Source implementation of the 4G/5G 3GPP core network. NextEPC
 (MME), Serving Gateway (SGW), Packet Data Network Gateway (PGW), Home Subscriber Server (HSS), and Policy and Charging
 Rules Functions (PCRF).
 
-NextEPC MME provides the S1 interfaces to the eNodeBs and S11 interface to SGW as well as S6a to the HSS.
+For More, Please visit [NextEPC Opensource Project Website](https://nextepc.org).
 
-NextEPC SGW implements the S11 interface which is connected to MME, and S5 interface to the PGW.
+# What's This Repo
 
-NextEPC PGW plays a role as an edge router in IP networks. It equipped with the S5 interface and  SGi interface towards
-the Internet, and S7 interface to PCRF.
+This repo is a modified NextEPC versin for FreeBSD 13. Which have been test.
 
-NextEPC HSS is the user subscription database.  It implements the S6a interface towards MME using the DIAMETER protocol.
-
-NextEPC PCRF controls the policies and rules for QoS of LTE users and bearers. It provides the Gx interface to PGW.
-
-# Installation and Configuration 
-
-Please visit [NextEPC Opensource Project Website](https://nextepc.org).
+It will be used for CityU 2023 fall CityUCS5296CloudComputing Group Project with other optimaztion.
 
 
-## Support
+# Installation and Configuration
 
-Technical service and supports are available on [https://nextepc.com](https://nextepc.com).
+```
+# Install mongodb and MongoDB C Driver
+doas pkg install mongodb44-4.4.26
+doas pkg install libmongocrypt
+mkdir -p data/db
+mongod --dbpath data/db
+
+# Set loopback interfaces up
+doas ifconfig lo0 alias 127.0.0.2 netmask 255.255.255.255
+doas ifconfig lo0 alias 127.0.0.3 netmask 255.255.255.255
+doas ifconfig lo0 alias 127.0.0.4 netmask 255.255.255.255
+doas ifconfig lo0 alias 127.0.0.5 netmask 255.255.255.255
+doas sysctl -w net.inet.ip.forwarding=1
+
+# Define a TUN device
+doas ifconfig tun create
+
+# Install dependencies
+doas pkg install git gcc bison gsed pkgconf autoconf \
+         automake libtool gnutls libgcrypt \
+         libidn libyaml
+# Build
+git clone https://github.com/kunlunh/nextepc
+cd nextepc
+autoreconf -iv
+./configure --prefix=`pwd`/install
+make -j `nproc`
+make install
+
+# Run
+nextepc-epcd
+
+# Install NextEPC WebUI
+doas pkg install node npm
+
+cd webui
+npm install
+npm run dev
+
+```
 
 
 ## License
