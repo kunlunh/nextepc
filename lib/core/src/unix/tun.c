@@ -77,8 +77,8 @@ status_t tun_open(sock_id *new, char *ifname, int is_tap)
     /* Save socket descriptor */
     sock->fd = fd;
     /* Save the interface name */
-    strncpy(sock->ifname, ifname, IFNAMSIZ-1);
-
+    //strncpy(sock->ifname, ifname, IFNAMSIZ-1);
+    strlcpy(sock->ifname, ifname, IFNAMSIZ);
 #if LINUX == 1
     memset(&ifr, 0, sizeof(ifr));
 
