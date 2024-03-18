@@ -2667,6 +2667,9 @@ status_t testgtpu_build_ping(
         c_uint16_t plen = 0;
         c_uint8_t nxt = 0;
         c_uint8_t *p = NULL;
+	c_uint8_t temp_cksum_buf[sizeof(struct ip6_hdr) + sizeof(struct icmp6_hdr)];
+        memset(temp_cksum_buf, 0, sizeof(temp_cksum_buf));
+
 
         gtp_h->length = htons(sizeof *ip6_h + sizeof *icmp6_h);
         plen =  htons(sizeof *icmp6_h);
@@ -2686,9 +2689,9 @@ status_t testgtpu_build_ping(
         icmp6_h->icmp6_type = ICMP6_ECHO_REQUEST;
         icmp6_h->icmp6_seq = rand();
         icmp6_h->icmp6_id = rand();
-
-        icmp6_h->icmp6_cksum = in_cksum(
-                (c_uint16_t *)ip6_h, sizeof *ip6_h + sizeof *icmp6_h);
+	memcpy(temp_cksum_buf, ip6_h, sizeof(struct ip6_hdr));
+        memcpy(temp_cksum_buf + sizeof(struct ip6_hdr), icmp6_h, sizeof(struct icmp6_hdr));
+        icmp6_h->icmp6_cksum = in_cksum((c_uint16_t *)temp_cksum_buf, sizeof(temp_cksum_buf));
 
         ip6_h->ip6_flow = htonl(0x60000001);
         ip6_h->ip6_plen = plen;
