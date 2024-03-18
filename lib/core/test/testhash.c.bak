@@ -40,12 +40,14 @@ static void dump_hash(hash_t *h, char str[][MAX_LTH])
         char *val = hash_this_val(hi);
 
         str[i][0]='\0';
-        snprintf(str[i], MAX_LTH, "Key %s (%d) Value %s\n", key, len, val);
+        sprintf(str[i], "%sKey %s (%d) Value %s\n",
+                 str[i], key, len, val);
+        
 	i++;
     }
     str[i][0]='\0';
-    //sprintf(str[i], "%s#entries %d\n", str[i], i);
-    snprintf(str[i], MAX_LTH, "#entries %d\n", i);
+    sprintf(str[i], "%s#entries %d\n", str[i], i);
+    //snprintf(str[i], sizeof(str[i]), "%s#entries %d\n", str[i], i);
     /* Sort the result strings so that they can be checked for expected results easily,
      * without having to worry about platform quirks
      */
